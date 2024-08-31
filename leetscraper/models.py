@@ -1,20 +1,42 @@
 from django.db import models
-
-# Create your models here.
-class LeetCodeQuestion(models.Model): # update this according to what we want saved in the database
-    question_title = models.CharField(max_length=225)
-    difficulty = models.CharField(max_length=50)
-    description = models.TextField()
-    url = models.URLField()
-    # set up foreignkey here and connect it to the ToDoList class
-
-    def __str__(self):
-        return f"{self.question_title} - {self.difficulty} - {self.description} - {self.url}"
+from django.contrib.auth.models import User
 
 class ToDoList(models.Model):
-    list_name = models.CharField(max_length=30)
-    list_description = models.CharField(max_length=200)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    name = models.CharField(max_length=30, default="To Code List")
     created_time = models.DateField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.name} - {self.created_time}"
+    
+class LeetCodeQuestion(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    todolist = models.ForeignKey(ToDoList, on_delete=models.CASCADE, related_name='questions', null=True, blank=True)
+    question_title = models.CharField(max_length=225, default="No question provided")
+    title_slug = models.CharField(max_length=225, default="No title slug provided")
+    difficulty = models.CharField(max_length=50, default="No difficulty provided")
+    hints = models.TextField(blank=True, default="No hints provided") 
+    companies = models.TextField(blank=True, default="No companies provided")  
+    topics = models.TextField(blank=True, default="No topics provided") 
+    similar_questions = models.TextField(blank=True, default="No similar questions provided")  
+    code_stubs = models.TextField(blank=True, default="No code_stubs provided") 
+    body = models.TextField(default="No Body Provided")  
+    is_paid_only = models.BooleanField(default=False)
+    completion = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.question_title} - {self.difficulty}"
+
+    def __str__(self):
+        return f"{self.question_title} - {self.difficulty}"
+
+class QuestionNotes(models.Model):
+    leetcodequestion = models.ForeignKey(LeetCodeQuestion, on_delete=models.CASCADE, related_name='notes')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    title = models.CharField(max_length=50)
+    body = models.TextField(blank=True)
+
+    def __str__(self):
+        return f"{self.title} - {self.body}"
+
+
