@@ -7,7 +7,10 @@ from .views import (
     create_note, 
     get_note, 
     update_note, 
-    delete_note
+    delete_note,
+    get_codesolution,
+    create_codesolution,
+    delete_codesolution
 )
 
 urlpatterns = [
@@ -19,4 +22,7 @@ urlpatterns = [
     path('todolist/questions/<int:question_id>/notes/<int:note_id>/', get_note, name='get_note'),
     path('todolist/questions/<int:question_id>/notes/<int:note_id>/update/', update_note, name='update_note'),
     path('todolist/questions/<int:question_id>/notes/<int:note_id>/delete/', delete_note, name='delete_note'),
+    path('codesolutions/', get_codesolution, name='get_codesolution'),
+    path('codesolutions/create/', create_codesolution, name='create_codesolution'),
+    path('codesolutions/<int:code_id>/delete/', delete_codesolution, name='delete_codesolution'),
 ]

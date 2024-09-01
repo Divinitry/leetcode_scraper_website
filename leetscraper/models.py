@@ -26,9 +26,17 @@ class LeetCodeQuestion(models.Model):
 
     def __str__(self):
         return f"{self.question_title} - {self.difficulty}"
+    
+class CodeSolution(models.Model):
+    leetcodequestion = models.ForeignKey(LeetCodeQuestion, on_delete=models.CASCADE, related_name='solutions', null=True, blank=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    code = models.TextField()
+    chatgpt_response = models.TextField()
+    ratings = models.IntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.question_title} - {self.difficulty}"
+        return f'Solution by {self.user.username} at {self.created_at}'
 
 class QuestionNotes(models.Model):
     leetcodequestion = models.ForeignKey(LeetCodeQuestion, on_delete=models.CASCADE, related_name='notes')
@@ -38,5 +46,3 @@ class QuestionNotes(models.Model):
 
     def __str__(self):
         return f"{self.title} - {self.body}"
-
-

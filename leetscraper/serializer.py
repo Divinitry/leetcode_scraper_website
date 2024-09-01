@@ -1,9 +1,14 @@
 from rest_framework import serializers
-from .models import ToDoList, LeetCodeQuestion, QuestionNotes
+from .models import ToDoList, LeetCodeQuestion, QuestionNotes, CodeSolution
 
 class QuestionNotesSerializer(serializers.ModelSerializer):
     class Meta:
         model = QuestionNotes
+        fields = '__all__'
+
+class CodeSolutionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CodeSolution
         fields = '__all__'
 
 class LeetCodeQuestionSerializer(serializers.ModelSerializer):
