@@ -22,7 +22,8 @@ urlpatterns = [
     path('todolist/questions/<int:question_id>/notes/<int:note_id>/', get_note, name='get_note'),
     path('todolist/questions/<int:question_id>/notes/<int:note_id>/update/', update_note, name='update_note'),
     path('todolist/questions/<int:question_id>/notes/<int:note_id>/delete/', delete_note, name='delete_note'),
-    path('codesolutions/', get_codesolution, name='get_codesolution'),
-    path('codesolutions/create/', create_codesolution, name='create_codesolution'),
-    path('codesolutions/<int:code_id>/delete/', delete_codesolution, name='delete_codesolution'),
+    path('todolist/questions/<int:question_id>/codesolutions/', get_codesolution, name='get_codesolution'),
+    path('todolist/questions/<int:question_id>/codesolutions/create/', create_codesolution, name='create_codesolution'),
+    path('todolist/questions/<int:question_id>/codesolutions/<int:code_id>/delete/', delete_codesolution, name='delete_codesolution'),
 ]
+
