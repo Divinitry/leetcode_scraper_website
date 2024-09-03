@@ -4,14 +4,28 @@ from rest_framework import status
 from .models import ToDoList, LeetCodeQuestion, QuestionNotes, CodeSolution
 from .serializer import ToDoListSerializer, LeetCodeQuestionSerializer, QuestionNotesSerializer, CodeSolutionSerializer
 
+# @api_view(['GET'])
+# def get_todolist(request):
+#     try:
+#         todolist = ToDoList.objects.get(id=1) # , user=request.user put this in once user auth is set up fully
+#         serializer = ToDoListSerializer(todolist)
+#         return Response(serializer.data)
+#     except ToDoList.DoesNotExist:
+#         return Response({"error": "ToDoList not found"}, status=status.HTTP_404_NOT_FOUND)
+
 @api_view(['GET'])
 def get_todolist(request):
     try:
-        todolist = ToDoList.objects.get(id=1, user=request.user)
-        serializer = ToDoListSerializer(todolist)
+        if request.user.is_authenticated:
+            todolists = ToDoList.objects.filter(user=request.user)
+        else:
+            todolists = ToDoList.objects.filter(user__isnull=True) 
+
+        serializer = ToDoListSerializer(todolists, many=True)
+
         return Response(serializer.data)
     except ToDoList.DoesNotExist:
-        return Response({"error": "ToDoList not found"}, status=status.HTTP_404_NOT_FOUND)
+        return Response({"error": "No ToDoLists found"}, status=status.HTTP_404_NOT_FOUND)
 
 @api_view(['POST'])
 def add_leetcode_question(request):
