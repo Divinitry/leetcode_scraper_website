@@ -135,8 +135,26 @@ AUTHENTICATION_BACKENDS = [
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-ACCOUNT_AUTHENTICATION_METHOD = "email"
-ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_AUTHENTICATION_METHOD = "username_email" 
+ACCOUNT_EMAIL_REQUIRED = True            
+ACCOUNT_EMAIL_VERIFICATION = "mandatory" 
+ACCOUNT_USERNAME_REQUIRED = True        
+ACCOUNT_USER_MODEL_USERNAME_FIELD = "username"
+
+# Allauth headless mode settings
+HEADLESS_ONLY = True
+
+# Here is where we put our front end urls and make them for ourselves
+HEADLESS_FRONTEND_URLS = {
+    "account_confirm_email": "http://localhost:3000/account/verify-email/{key}",
+    "account_reset_password": "http://localhost:3000/account/reset-password",
+    "account_reset_password_from_key": "http://localhost:3000/account/reset-password/key/{key}",
+    "account_signup": "http://localhost:3000/account/signup",
+    "account_login": "http://localhost:3000/account/login",
+    "account_logout": "http://localhost:3000/account/logout",
+}
+
+HEADLESS_TOKEN_STRATEGY = "allauth.headless.tokens.sessions.SessionTokenStrategy"
 
 # LOGIN_REDIRECT_URL = '/leetscraper/' 
 # ACCOUNT_SIGNUP_REDIRECT_URL = '/leetscraper/'  
