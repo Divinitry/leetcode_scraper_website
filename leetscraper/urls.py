@@ -10,7 +10,8 @@ from .views import (
     delete_note,
     get_codesolution,
     create_codesolution,
-    delete_codesolution
+    delete_codesolution,
+    send_and_getsearchinfo
 )
 
 urlpatterns = [
@@ -25,5 +26,6 @@ urlpatterns = [
     path('todolist/questions/<int:question_id>/codesolutions/', get_codesolution, name='get_codesolution'),
     path('todolist/questions/<int:question_id>/codesolutions/create/', create_codesolution, name='create_codesolution'),
     path('todolist/questions/<int:question_id>/codesolutions/<int:code_id>/delete/', delete_codesolution, name='delete_codesolution'),
+    path('api/search/<str:search_string>', send_and_getsearchinfo, name='send_and_getsearchinfo')
 ]
 

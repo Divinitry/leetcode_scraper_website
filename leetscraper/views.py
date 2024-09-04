@@ -3,6 +3,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from .models import ToDoList, LeetCodeQuestion, QuestionNotes, CodeSolution
 from .serializer import ToDoListSerializer, LeetCodeQuestionSerializer, QuestionNotesSerializer, CodeSolutionSerializer
+from .services.leetscrape_api import get_leetscrape_data
+from django.http import JsonResponse
 
 # @api_view(['GET'])
 # def get_todolist(request):
@@ -139,3 +141,8 @@ def delete_codesolution(request, code_id):
         return Response({"message": "Solution deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
     except CodeSolution.DoesNotExist:
         return Response({"error": "Code solution not found"}, status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['GET'])
+def send_and_getsearchinfo(request, search_string):
+    data = get_leetscrape_data(search_string)
+    return JsonResponse(data)
