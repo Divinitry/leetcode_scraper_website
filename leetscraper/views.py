@@ -1,61 +1,59 @@
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from .models import ToDoList, LeetCodeQuestion, QuestionNotes, CodeSolution
-from .serializer import ToDoListSerializer, LeetCodeQuestionSerializer, QuestionNotesSerializer, CodeSolutionSerializer
+from .serializer import ToDoListSerializer, LeetCodeQuestionSerializer, QuestionNotesSerializer, CodeSolutionSerializer, UserSerializer
 from .services.leetscrape_api import get_leetscrape_data
 from django.http import JsonResponse
+from django.contrib.auth.models import User
+from rest_framework import generics
 
-# @api_view(['GET'])
-# def get_todolist(request):
-#     try:
-#         todolist = ToDoList.objects.get(id=1) # , user=request.user put this in once user auth is set up fully
-#         serializer = ToDoListSerializer(todolist)
-#         return Response(serializer.data)
-#     except ToDoList.DoesNotExist:
-#         return Response({"error": "ToDoList not found"}, status=status.HTTP_404_NOT_FOUND)
+class CreateUserView(generics.CreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = (AllowAny,)
+
+    def perform_create(self, serializer):
+        user = serializer.save()
+        ToDoList.objects.create(name="Default To-Do List", user=user)
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def get_todolist(request):
     try:
-        if request.user.is_authenticated:
-            todolists = ToDoList.objects.filter(user=request.user)
-        else:
-            todolists = ToDoList.objects.filter(user__isnull=True) 
-
+        todolists = ToDoList.objects.filter(user=request.user)
         serializer = ToDoListSerializer(todolists, many=True)
-
         return Response(serializer.data)
     except ToDoList.DoesNotExist:
         return Response({"error": "No ToDoLists found"}, status=status.HTTP_404_NOT_FOUND)
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def add_leetcode_question(request):
     try:
         todolist = ToDoList.objects.get(id=1, user=request.user)
     except ToDoList.DoesNotExist:
         return Response({"error": "ToDoList not found"}, status=status.HTTP_404_NOT_FOUND)
-    
-    title_slug = request.data.get('title_slug')
 
+    title_slug = request.data.get('title_slug')
     if LeetCodeQuestion.objects.filter(todolist=todolist, title_slug=title_slug, user=request.user).exists():
         return Response({"error": "LeetCodeQuestion already exists in the To Do List"}, status=status.HTTP_400_BAD_REQUEST)
-    
+
     serializer = LeetCodeQuestionSerializer(data=request.data)
-    
     if serializer.is_valid():
         serializer.save(todolist=todolist, user=request.user)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-    else:
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
 def remove_leetcode_question(request, question_id):
     try:
         todolist = ToDoList.objects.get(id=1, user=request.user)
     except ToDoList.DoesNotExist:
         return Response({"error": "ToDoList not found"}, status=status.HTTP_404_NOT_FOUND)
-    
+
     try:
         leetcode_question = LeetCodeQuestion.objects.get(id=question_id, todolist=todolist, user=request.user)
         leetcode_question.delete()
@@ -64,6 +62,7 @@ def remove_leetcode_question(request, question_id):
         return Response({"error": "LeetCodeQuestion not found"}, status=status.HTTP_404_NOT_FOUND)
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def show_leetcode_question(request, question_id):
     try:
         leetcode_question = LeetCodeQuestion.objects.get(id=question_id, user=request.user)
@@ -73,12 +72,13 @@ def show_leetcode_question(request, question_id):
         return Response({"error": "LeetCodeQuestion not found"}, status=status.HTTP_404_NOT_FOUND)
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def create_note(request, question_id):
     try:
         leetcode_question = LeetCodeQuestion.objects.get(id=question_id, user=request.user)
     except LeetCodeQuestion.DoesNotExist:
         return Response({"error": "LeetCodeQuestion not found"}, status=status.HTTP_404_NOT_FOUND)
-    
+
     serializer = QuestionNotesSerializer(data=request.data)
     if serializer.is_valid():
         serializer.save(leetcodequestion=leetcode_question, user=request.user)
@@ -86,6 +86,7 @@ def create_note(request, question_id):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def get_note(request, note_id):
     try:
         note = QuestionNotes.objects.get(id=note_id, user=request.user)
@@ -95,12 +96,13 @@ def get_note(request, note_id):
         return Response({"error": "Note not found"}, status=status.HTTP_404_NOT_FOUND)
 
 @api_view(['PUT'])
+@permission_classes([IsAuthenticated])
 def update_note(request, note_id):
     try:
         note = QuestionNotes.objects.get(id=note_id, user=request.user)
     except QuestionNotes.DoesNotExist:
         return Response({"error": "Note not found"}, status=status.HTTP_404_NOT_FOUND)
-    
+
     serializer = QuestionNotesSerializer(note, data=request.data)
     if serializer.is_valid():
         serializer.save()
@@ -108,6 +110,7 @@ def update_note(request, note_id):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
 def delete_note(request, note_id):
     try:
         note = QuestionNotes.objects.get(id=note_id, user=request.user)
@@ -117,6 +120,7 @@ def delete_note(request, note_id):
         return Response({"error": "Note not found"}, status=status.HTTP_404_NOT_FOUND)
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def get_codesolution(request):
     try: 
         code_solutions = CodeSolution.objects.filter(user=request.user)
@@ -126,6 +130,7 @@ def get_codesolution(request):
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def create_codesolution(request):
     serializer = CodeSolutionSerializer(data=request.data)
     if serializer.is_valid():
@@ -134,6 +139,7 @@ def create_codesolution(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
 def delete_codesolution(request, code_id):
     try:
         code_solution = CodeSolution.objects.get(id=code_id, user=request.user)
@@ -143,6 +149,7 @@ def delete_codesolution(request, code_id):
         return Response({"error": "Code solution not found"}, status=status.HTTP_404_NOT_FOUND)
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def send_and_getsearchinfo(request, search_string):
     data = get_leetscrape_data(search_string)
     return JsonResponse(data)
