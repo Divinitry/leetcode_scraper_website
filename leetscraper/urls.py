@@ -1,6 +1,5 @@
 from django.urls import path
 from .views import (
-    get_todolist, 
     add_leetcode_question, 
     remove_leetcode_question, 
     show_leetcode_question,
@@ -11,12 +10,13 @@ from .views import (
     get_codesolution,
     create_codesolution,
     delete_codesolution,
-    send_and_getsearchinfo
+    send_and_getsearchinfo,
+    get_user_questions
 )
 
 urlpatterns = [
-    path('todolist/', get_todolist, name='get_todolist'),
     path('todolist/questions/add/', add_leetcode_question, name='add_leetcode_question'),
+    path('todolist/questions/all/', get_user_questions, name='get_user_questions'),
     path('todolist/questions/remove/<int:question_id>/', remove_leetcode_question, name='remove_leetcode_question'),
     path('todolist/questions/<int:question_id>/', show_leetcode_question, name='show_leetcode_question'),
     path('todolist/questions/<int:question_id>/notes/create/', create_note, name='create_note'),

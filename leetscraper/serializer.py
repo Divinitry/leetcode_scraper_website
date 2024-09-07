@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
-from .models import ToDoList, LeetCodeQuestion, QuestionNotes, CodeSolution
+from .models import LeetCodeQuestion, QuestionNotes, CodeSolution
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -15,7 +15,7 @@ class UserSerializer(serializers.ModelSerializer):
 class QuestionNotesSerializer(serializers.ModelSerializer):
     class Meta:
         model = QuestionNotes
-        fields = '__all__'
+        fields = ['id', 'title', 'body', 'user', 'leetcodequestion']
 
 class CodeSolutionSerializer(serializers.ModelSerializer):
     class Meta:
@@ -27,11 +27,4 @@ class LeetCodeQuestionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = LeetCodeQuestion
-        fields = '__all__'
-
-class ToDoListSerializer(serializers.ModelSerializer):
-    questions = LeetCodeQuestionSerializer(many=True, read_only=True)
-
-    class Meta:
-        model = ToDoList
-        fields = '__all__'
+        fields = ['question_title', 'title_slug', 'difficulty', 'hints', 'companies', 'topics', 'similar_questions', 'code_stubs', 'body', 'is_paid_only', 'notes']
