@@ -8,6 +8,6 @@ urlpatterns = [
     path('leetscraper/', include('leetscraper.urls')),
     path('leetscraper/user/register/', CreateUserView.as_view(), name = "register"),
     path('leetscraper/token/', TokenObtainPairView.as_view(), name = "get_token"),
-    path('leetscraper/token/refresh', TokenRefreshView.as_view(), name = "refresh"),
+    path('leetscraper/token/refresh/', TokenRefreshView.as_view(), name = "refresh"),
     path('leetscraper-auth/', include('rest_framework.urls')),
 ]
