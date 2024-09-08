@@ -27,4 +27,4 @@ class LeetCodeQuestionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = LeetCodeQuestion
-        fields = ['question_title', 'title_slug', 'difficulty', 'hints', 'companies', 'topics', 'similar_questions', 'code_stubs', 'body', 'is_paid_only', 'notes']
+        fields = ['id', 'question_title', 'title_slug', 'difficulty', 'hints', 'companies', 'topics', 'similar_questions', 'code_stubs', 'body', 'is_paid_only', 'notes']
