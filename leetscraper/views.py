@@ -20,6 +20,11 @@ class CreateUserView(generics.CreateAPIView):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def add_leetcode_question(request):
+    question_title = request.data.get('question_title')
+    
+    if LeetCodeQuestion.objects.filter(question_title=question_title, user=request.user).exists():
+        return Response({'error': 'Question already in your to do list'}, status=status.HTTP_400_BAD_REQUEST)
+
     serializer = LeetCodeQuestionSerializer(data=request.data)
     if serializer.is_valid():
         serializer.save(user=request.user)
