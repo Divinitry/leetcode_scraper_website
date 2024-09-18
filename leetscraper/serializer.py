@@ -15,7 +15,7 @@ class UserSerializer(serializers.ModelSerializer):
 class QuestionNotesSerializer(serializers.ModelSerializer):
     class Meta:
         model = QuestionNotes
-        fields = ['id', 'title', 'body', 'user', 'leetcodequestion']
+        fields = ['id', 'title', 'body']
 
 class CodeSolutionSerializer(serializers.ModelSerializer):
     class Meta:

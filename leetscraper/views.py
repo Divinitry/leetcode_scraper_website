@@ -76,17 +76,17 @@ def create_note(request, question_id):
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-def get_note(request, note_id):
+def get_note(request, question_id):
     try:
-        note = QuestionNotes.objects.get(id=note_id, user=request.user)
-        serializer = QuestionNotesSerializer(note)
+        notes = QuestionNotes.objects.filter(leetcodequestion__id=question_id, user=request.user)
+        serializer = QuestionNotesSerializer(notes, many=True)
         return Response(serializer.data)
     except QuestionNotes.DoesNotExist:
-        return Response({"error": "Note not found"}, status=status.HTTP_404_NOT_FOUND)
+        return Response({"error": "No notes found for this question"}, status=status.HTTP_404_NOT_FOUND)
 
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
-def update_note(request, note_id):
+def update_note(request, question_id, note_id):
     try:
         note = QuestionNotes.objects.get(id=note_id, user=request.user)
     except QuestionNotes.DoesNotExist:
@@ -100,7 +100,7 @@ def update_note(request, note_id):
 
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
-def delete_note(request, note_id):
+def delete_note(request, question_id, note_id):
     try:
         note = QuestionNotes.objects.get(id=note_id, user=request.user)
         note.delete()

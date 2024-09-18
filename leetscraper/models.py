@@ -32,8 +32,8 @@ class CodeSolution(models.Model):
 class QuestionNotes(models.Model):
     leetcodequestion = models.ForeignKey(LeetCodeQuestion, on_delete=models.CASCADE, related_name='notes')
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    title = models.CharField(max_length=50)
-    body = models.TextField(blank=True)
+    title = models.CharField(max_length=50, default="Untitled")
+    body = models.TextField(blank=True, default="Click to add")
 
     def __str__(self):
         return f"{self.title} - {self.body}"
