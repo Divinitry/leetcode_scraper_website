@@ -111,22 +111,45 @@ def delete_note(request, question_id, note_id):
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-def get_codesolution(request):
-    try: 
-        code_solutions = CodeSolution.objects.filter(user=request.user)
+def get_codesolution(request, question_id):
+    try:
+        leetcode_question = LeetCodeQuestion.objects.get(id=question_id)
+        code_solutions = CodeSolution.objects.filter(user=request.user, leetcodequestion=leetcode_question)
         serializer = CodeSolutionSerializer(code_solutions, many=True)
+        
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    except LeetCodeQuestion.DoesNotExist:
+        return Response({'error': 'LeetCode question not found.'}, status=status.HTTP_404_NOT_FOUND)
+    
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def create_codesolution(request):
-    serializer = CodeSolutionSerializer(data=request.data)
-    if serializer.is_valid():
-        serializer.save(user=request.user)
+def create_codesolution(request, question_id):
+    try:
+        leetcode_question = LeetCodeQuestion.objects.get(id=question_id)
+        
+        code_solution = CodeSolution.objects.create(
+            user=request.user,
+            leetcodequestion=leetcode_question, 
+            code=request.data.get('code'),
+            chatgpt_response=request.data.get('chatgpt_response'),
+            ratings=request.data.get('ratings')
+        )
+        
+        serializer = CodeSolutionSerializer(code_solution)
+        
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    except LeetCodeQuestion.DoesNotExist:
+        return Response({'error': 'LeetCode question not found.'}, status=status.HTTP_404_NOT_FOUND)
+    
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
 
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])

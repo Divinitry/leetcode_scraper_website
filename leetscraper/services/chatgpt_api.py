@@ -11,17 +11,23 @@ client = OpenAI(api_key=api_key)
 
 def get_feedback(leetcode_question, user_code, leetcode_question_topics):
     prompt = f"""
-        1. Analyze the following LeetCode problem the user is trying to solve: {leetcode_question}.
-        2. Evaluate the user's code for the problem: {user_code}.
-        3. If the code has no relevance to the LeetCode problem, respond with: 
+        Analyze the following LeetCode problem the user is trying to solve: {leetcode_question}.
+        Evaluate the user's code for the problem: {user_code}.
+
+        If the code has no relevance to the LeetCode problem, respond with: 
         "Nice code, but it seems unrelated to the question." 
         (Skip the remaining steps if this is the case. Continue only if the code seems relevant to the problem.)
-        4. Indicate whether the user's code correctly answers the problem. Respond with: 
+
+        Indicate whether the user's code correctly answers the problem. Respond with: 
         "Answered question correctly: yes/no."
-        5. Based on the problem's topics (e.g., strings, linked lists, recursion, array, two pointers), identify common challenges users face with these topics. Highlight the areas where the user may need more practice. Here are the topics: {leetcode_question_topics}.
-        6. Provide a rating between 1 and 10 based on how well the code addresses the problem. Explicitly return this number at the end as "Rating: X".
-        7. Offer detailed feedback on the code, pointing out strengths and areas for improvement. Include any common mistakes that users typically make on this particular problem, and highlight if the user shows these issues in their code.
-        8. Structure the response into two sections: 
+
+        Based on the problem's topics (e.g., strings, linked lists, recursion, array, two pointers), identify common challenges users face with these topics. Highlight the areas where the user may need more practice. Here are the topics: {leetcode_question_topics}.
+
+        Provide a rating between 1 and 10 based on how well the code addresses the problem. Explicitly return this number at the end as "Rating: X".
+
+        Offer detailed feedback on the code, pointing out strengths and areas for improvement. Include any common mistakes that users typically make on this particular problem, and highlight if the user shows these issues in their code.
+
+        Structure the response into two sections: 
         - A paragraph with the feedback
         - A separate line for the rating in the format: "Rating: X"
     """
