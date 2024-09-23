@@ -11,7 +11,8 @@ from .views import (
     create_codesolution,
     delete_codesolution,
     send_and_getsearchinfo,
-    get_user_questions
+    get_user_questions,
+    get_gptfeedback,
 )
 
 urlpatterns = [
@@ -26,6 +27,7 @@ urlpatterns = [
     path('todolist/questions/<int:question_id>/codesolutions/', get_codesolution, name='get_codesolution'),
     path('todolist/questions/<int:question_id>/codesolutions/create/', create_codesolution, name='create_codesolution'),
     path('todolist/questions/<int:question_id>/codesolutions/<int:code_id>/delete/', delete_codesolution, name='delete_codesolution'),
-    path('api/search/<str:search_string>', send_and_getsearchinfo, name='send_and_getsearchinfo')
+    path('api/search/<str:search_string>', send_and_getsearchinfo, name='send_and_getsearchinfo'),
+    path('api/chatgptapi/', get_gptfeedback, name='get_gptfeedback')
 ]
 

@@ -8,6 +8,7 @@ from .services.leetscrape_api import get_leetscrape_data
 from django.http import JsonResponse
 from django.contrib.auth.models import User
 from rest_framework import generics
+from .services.chatgpt_api import get_feedback
 
 class CreateUserView(generics.CreateAPIView):
     queryset = User.objects.all()
@@ -157,3 +158,23 @@ def send_and_getsearchinfo(request, search_string):
     except Exception as e:
         print(f"Error occurred: {str(e)}")
         return JsonResponse({"error": "Internal Server Error"}, status=500)
+    
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def get_gptfeedback(request):
+    try:
+        data = request.data
+
+        # .get lets you retrieve the value within a key value pair (dictionary) by calling the key super useful
+
+        leetcode_question = data.get('question_title') 
+        leetcode_question_topics = data.get('question_topics')
+        user_code = data.get('user_code') 
+
+        feedback, rating = get_feedback(leetcode_question, user_code, leetcode_question_topics)
+        return Response({
+            "feedback": feedback,
+            "rating": rating
+        }, status=200)
+    except Exception as e: 
+        return Response({"error": f"An error occurred: {str(e)}"}, status=500)
