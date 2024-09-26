@@ -8,7 +8,7 @@ from .services.leetscrape_api import get_leetscrape_data
 from django.http import JsonResponse
 from django.contrib.auth.models import User
 from rest_framework import generics
-from .services.chatgpt_api import get_feedback
+from .services.chatgpt_api import get_feedback, get_start_code
 
 class CreateUserView(generics.CreateAPIView):
     queryset = User.objects.all()
@@ -200,5 +200,17 @@ def get_gptfeedback(request):
             "rating": rating
         }, status=200)
     except Exception as e: 
+        return Response({"error": f"An error occurred: {str(e)}"}, status=500)
+    
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def get_starter_code(request):
+    try:
+        code_body = request.data
+        starter_code = get_start_code(code_body)
+
+        return Response(starter_code, status=200)
+
+    except Exception as e:
         return Response({"error": f"An error occurred: {str(e)}"}, status=500)
     

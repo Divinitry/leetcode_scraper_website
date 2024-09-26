@@ -56,3 +56,47 @@ def get_feedback(leetcode_question, user_code, leetcode_question_topics):
     except Exception as e:
         print(f"An error occurred: {e}")
         return None, None
+
+def get_start_code(code_body):
+    prompt = f"""
+        You are given a coding problem statement. Based on this problem, generate function signatures with placeholders for the solution code and example test cases. Each language should follow the standard signature format for that language (e.g., including docstrings for Python, public methods for Java, etc.). The output should include:
+
+        - The function signature, tailored to the specific language.
+        - A placeholder comment (# Your code here or equivalent for the language).
+        - Example test cases, including inputs and outputs.
+
+        Please generate this for the following languages: JavaScript, TypeScript, Python, Java, and C#.
+
+        Here is the coding problem:
+
+        {code_body}
+
+        For each comment you return, do not include the name of the language in any of the comments.
+
+        Make sure you seperate each comment with *** so I can split them properly please
+
+        For each language, generate only the function signature, placeholder comment, and example test cases. **Do not include the language name or any additional headings.
+    """
+    
+    response = client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant that reviews code."},
+            {"role": "user", "content": prompt}
+        ],
+        max_tokens=1000  
+    )
+
+    chatgpt_response = response.choices[0].message.content
+    
+    sections = chatgpt_response.split('***')
+
+    responses = {
+        "JavaScript": sections[0].strip(),
+        "TypeScript": sections[1].strip(),
+        "Python": sections[2].strip(),
+        "Java": sections[3].strip(),
+        "C#": sections[4].strip()
+    }
+
+    return responses

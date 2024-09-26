@@ -13,6 +13,7 @@ from .views import (
     send_and_getsearchinfo,
     get_user_questions,
     get_gptfeedback,
+    get_starter_code
 )
 
 urlpatterns = [
@@ -29,5 +30,6 @@ urlpatterns = [
     path('todolist/questions/<int:question_id>/codesolutions/<int:code_id>/delete/', delete_codesolution, name='delete_codesolution'),
     path('api/search/<str:search_string>', send_and_getsearchinfo, name='send_and_getsearchinfo'),
     path('api/chatgptapi/feedback', get_gptfeedback, name='get_gptfeedback'),
+    path('api/chatgptapi/startercode', get_starter_code, name='get_starter_code')
 ]
 
