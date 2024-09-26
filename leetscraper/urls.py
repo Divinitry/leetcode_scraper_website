@@ -28,6 +28,6 @@ urlpatterns = [
     path('todolist/questions/<int:question_id>/codesolutions/create/', create_codesolution, name='create_codesolution'),
     path('todolist/questions/<int:question_id>/codesolutions/<int:code_id>/delete/', delete_codesolution, name='delete_codesolution'),
     path('api/search/<str:search_string>', send_and_getsearchinfo, name='send_and_getsearchinfo'),
-    path('api/chatgptapi/', get_gptfeedback, name='get_gptfeedback')
+    path('api/chatgptapi/feedback', get_gptfeedback, name='get_gptfeedback'),
 ]
 
