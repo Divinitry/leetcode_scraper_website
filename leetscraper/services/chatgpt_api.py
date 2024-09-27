@@ -62,8 +62,8 @@ def get_start_code(code_body):
         You are given a coding problem statement. Based on this problem, generate function signatures with placeholders for the solution code and example test cases. Each language should follow the standard signature format for that language (e.g., including docstrings for Python, public methods for Java, etc.). The output should include:
 
         - The function signature, tailored to the specific language.
-        - A placeholder comment (# Your code here or equivalent for the language).
-        - Example test cases, including inputs and outputs.
+        - A placeholder comment ('// Your code here', '# Your code here', etc.) appropriate for each language.
+        - Example test cases with inputs and expected outputs.
 
         Please generate this for the following languages: JavaScript, TypeScript, Python, Java, and C#.
 
@@ -71,11 +71,11 @@ def get_start_code(code_body):
 
         {code_body}
 
-        For each comment you return, do not include the name of the language in any of the comments.
-
-        Make sure you seperate each comment with *** so I can split them properly please
-
-        For each language, generate only the function signature, placeholder comment, and example test cases. **Do not include the language name or any additional headings.
+        Please ensure the following:
+        - Do not include the name of the language anywhere in the output.
+        - Do not include headings or additional explanations, just the code.
+        - Separate each language block with "***", so I can easily split them later.
+        - Ensure function signatures and example test cases are formatted as executable code in each respective language.
     """
     
     response = client.chat.completions.create(
