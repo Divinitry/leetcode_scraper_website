@@ -91,12 +91,10 @@ def get_start_code(code_body):
     
     sections = chatgpt_response.split('***')
 
-    responses = {
-        "JavaScript": sections[0].strip(),
-        "TypeScript": sections[1].strip(),
-        "Python": sections[2].strip(),
-        "Java": sections[3].strip(),
-        "C#": sections[4].strip()
-    }
+    javascript_startercode = sections[0].strip()
+    typescript_startercode = sections[1].strip()
+    python_startercode = sections[2].strip()
+    java_startercode = sections[3].strip()
+    csharp_startercode = sections[4].strip()
 
-    return responses
+    return javascript_startercode, typescript_startercode, python_startercode, java_startercode, csharp_startercode

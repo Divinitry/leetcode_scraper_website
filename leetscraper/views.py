@@ -207,9 +207,16 @@ def get_gptfeedback(request):
 def get_starter_code(request):
     try:
         code_body = request.data
-        starter_code = get_start_code(code_body)
 
-        return Response(starter_code, status=200)
+        javascript_startercode, typescript_startercode, python_startercode, java_startercode, csharp_startercode = get_start_code(code_body)
+
+        return Response({
+            "javascript_starter_code": javascript_startercode,
+            "typescript_starter_code": typescript_startercode,
+            "python_starter_code": python_startercode,
+            "java_starter_code": java_startercode,
+            "csharp_starter_code": csharp_startercode,
+        }, status=200)
 
     except Exception as e:
         return Response({"error": f"An error occurred: {str(e)}"}, status=500)
