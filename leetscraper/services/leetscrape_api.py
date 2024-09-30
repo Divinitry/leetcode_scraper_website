@@ -1,7 +1,11 @@
 from leetscrape import GetQuestion
 
 def get_leetscrape_data(search_string):
-    search_term = search_string.replace(" ", "-")
+    if not isinstance(search_string, str):
+        print(f"Error: Received non-string input: {search_string}")
+        return {"error": "Invalid input"}
+    
+    search_term = search_string.strip().replace(" ", "-")
     
     try:
         question = GetQuestion(titleSlug=search_term).scrape()
@@ -27,4 +31,3 @@ def get_leetscrape_data(search_string):
     except Exception as e:
         print(f"Error scraping data: {str(e)}")
         return {"error": "Failed to fetch data"}
-
