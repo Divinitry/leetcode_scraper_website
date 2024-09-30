@@ -40,7 +40,7 @@ def add_leetcode_question(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_user_questions(request):
-    user_questions = LeetCodeQuestion.objects.filter(user=request.user)
+    user_questions = LeetCodeQuestion.objects.filter(user=request.user).order_by('created_at')
     
     serializer = LeetCodeQuestionSerializer(user_questions, many=True)
     

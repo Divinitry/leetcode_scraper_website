@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils import timezone
     
 class LeetCodeQuestion(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -13,7 +14,7 @@ class LeetCodeQuestion(models.Model):
     code_stubs = models.TextField(blank=True, default="No code_stubs provided") 
     body = models.TextField(default="No Body Provided")  
     is_paid_only = models.BooleanField(default=False)
-    completion = models.BooleanField(default=False)
+    created_at = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
         return f"{self.question_title} - {self.difficulty}"
