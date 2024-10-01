@@ -37,8 +37,6 @@ def get_feedback(leetcode_question, user_code, leetcode_question_topics):
             max_tokens=300
         )
 
-        print("Full response from OpenAI:", response)
-
         chatgpt_response = response.choices[0].message.content
 
         feedback = chatgpt_response.split("Rating:")[0].strip()

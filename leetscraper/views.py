@@ -169,14 +169,12 @@ def delete_codesolution(request, code_id):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def send_and_getsearchinfo(request, search_string):
-    print(f"Received search string: {search_string}")
     
     if not search_string:
         return JsonResponse({"error": "No search string provided"}, status=400)
 
     try:
         data = get_leetscrape_data(search_string)
-        print(f"Data fetched: {data}")
 
         if "error" in data:
             return JsonResponse(data, status=404)
