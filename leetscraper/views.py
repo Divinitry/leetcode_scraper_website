@@ -18,6 +18,11 @@ class CreateUserView(generics.CreateAPIView):
     def perform_create(self, serializer):
         user = serializer.save()
 
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def check_login_status(request):
+    return Response({"is_logged_in": request.user.is_authenticated}, status=status.HTTP_200_OK)
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def add_leetcode_question(request):
