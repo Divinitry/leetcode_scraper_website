@@ -113,13 +113,4 @@ CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOWED_ORIGINS = [
     'https://leetscraper.netlify.app',
 ]
-CORS_ALLOW_HEADERS = [
-    'Authorization',
-    'Content-Type',
-    'X-Requested-With',
-    'Accept',
-    'Origin',
-    'Access-Control-Request-Method',
-    'Access-Control-Request-Headers',
-]
 CORS_ALLOW_CREDENTIALS = True
