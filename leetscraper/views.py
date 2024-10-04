@@ -29,6 +29,7 @@ class CreateUserView(generics.CreateAPIView):
     permission_classes = (AllowAny,)
 
     def perform_create(self, serializer):
+        print(f"Received registration data: {self.request.data}", flush=True)
         user = serializer.save()
 
 @api_view(['GET', 'OPTIONS'])
@@ -37,6 +38,9 @@ def check_login_status(request):
     options_response = handle_options_request(request)
     if options_response:
         return options_response
+    
+    print(f"Headers: {request.headers}", flush=True)
+    print(f"User Authenticated: {request.user.is_authenticated}", flush=True)
 
     response = Response({"is_logged_in": request.user.is_authenticated}, status=status.HTTP_200_OK)
     return add_cors_headers(response)
