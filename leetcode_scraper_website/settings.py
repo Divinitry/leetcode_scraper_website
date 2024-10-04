@@ -111,6 +111,6 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOWED_ORIGINS = [
-    'https://leetscraper.netlify.app/',
+    'https://leetscraper.netlify.app',
 ]
 CORS_ALLOW_CREDENTIALS = True
