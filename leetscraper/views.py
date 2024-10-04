@@ -29,8 +29,10 @@ class CreateUserView(generics.CreateAPIView):
     permission_classes = (AllowAny,)
 
     def perform_create(self, serializer):
-        print(f"Received registration data: {self.request.data}", flush=True)
-        user = serializer.save()
+        try:
+            user = serializer.save()
+        except Exception as e:
+            return Response({'error': f"Error during registration: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET', 'OPTIONS'])
 @permission_classes([AllowAny])
@@ -38,12 +40,12 @@ def check_login_status(request):
     options_response = handle_options_request(request)
     if options_response:
         return options_response
-    
-    print(f"Headers: {request.headers}", flush=True)
-    print(f"User Authenticated: {request.user.is_authenticated}", flush=True)
 
-    response = Response({"is_logged_in": request.user.is_authenticated}, status=status.HTTP_200_OK)
-    return add_cors_headers(response)
+    try:
+        response = Response({"is_logged_in": request.user.is_authenticated}, status=status.HTTP_200_OK)
+        return add_cors_headers(response)
+    except Exception as e:
+        return Response({'error': f"Error during login status check: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['POST', 'OPTIONS'])
 @permission_classes([IsAuthenticated])
@@ -52,23 +54,23 @@ def add_leetcode_question(request):
     if options_response:
         return options_response
 
-    question_title = request.data.get('question_title', '').strip()
+    try:
+        question_title = request.data.get('question_title', '').strip()
 
-    if LeetCodeQuestion.objects.filter(question_title__iexact=question_title, user=request.user).exists():
-        response = Response({'error': 'Question already in your to-do list'}, status=status.HTTP_400_BAD_REQUEST)
-        return add_cors_headers(response)
+        if LeetCodeQuestion.objects.filter(question_title__iexact=question_title, user=request.user).exists():
+            return Response({'error': 'Question already in your to-do list'}, status=status.HTTP_400_BAD_REQUEST)
 
-    data = request.data.copy()
-    data['question_title'] = question_title
+        data = request.data.copy()
+        data['question_title'] = question_title
 
-    serializer = LeetCodeQuestionSerializer(data=data)
-    if serializer.is_valid():
-        serializer.save(user=request.user)
-        response = Response(serializer.data, status=status.HTTP_201_CREATED)
-        return add_cors_headers(response)
-    
-    response = Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    return add_cors_headers(response)
+        serializer = LeetCodeQuestionSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save(user=request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return Response({'error': f"Error while adding question: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['GET', 'OPTIONS'])
 @permission_classes([IsAuthenticated])
@@ -77,10 +79,12 @@ def get_user_questions(request):
     if options_response:
         return options_response
 
-    user_questions = LeetCodeQuestion.objects.filter(user=request.user).order_by('created_at')
-    serializer = LeetCodeQuestionSerializer(user_questions, many=True)
-    response = Response(serializer.data)
-    return add_cors_headers(response)
+    try:
+        user_questions = LeetCodeQuestion.objects.filter(user=request.user).order_by('created_at')
+        serializer = LeetCodeQuestionSerializer(user_questions, many=True)
+        return Response(serializer.data)
+    except Exception as e:
+        return Response({'error': f"Error retrieving questions: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['DELETE', 'OPTIONS'])
 @permission_classes([IsAuthenticated])
@@ -92,11 +96,11 @@ def remove_leetcode_question(request, question_id):
     try:
         leetcode_question = LeetCodeQuestion.objects.get(id=question_id, user=request.user)
         leetcode_question.delete()
-        response = Response({"message": "LeetCodeQuestion deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
-        return add_cors_headers(response)
+        return Response({"message": "LeetCodeQuestion deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
     except LeetCodeQuestion.DoesNotExist:
-        response = Response({"error": "LeetCodeQuestion not found"}, status=status.HTTP_404_NOT_FOUND)
-        return add_cors_headers(response)
+        return Response({"error": "LeetCodeQuestion not found"}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({"error": f"Error while deleting question: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['GET', 'OPTIONS'])
 @permission_classes([IsAuthenticated])
@@ -108,11 +112,11 @@ def show_leetcode_question(request, question_id):
     try:
         leetcode_question = LeetCodeQuestion.objects.get(id=question_id, user=request.user)
         serializer = LeetCodeQuestionSerializer(leetcode_question)
-        response = Response(serializer.data)
-        return add_cors_headers(response)
+        return Response(serializer.data)
     except LeetCodeQuestion.DoesNotExist:
-        response = Response({"error": "LeetCodeQuestion not found"}, status=status.HTTP_404_NOT_FOUND)
-        return add_cors_headers(response)
+        return Response({"error": "LeetCodeQuestion not found"}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({"error": f"Error while fetching question: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['POST', 'OPTIONS'])
 @permission_classes([IsAuthenticated])
@@ -124,16 +128,13 @@ def create_note(request, question_id):
     try:
         leetcode_question = LeetCodeQuestion.objects.get(id=question_id, user=request.user)
     except LeetCodeQuestion.DoesNotExist:
-        response = Response({"error": "LeetCodeQuestion not found"}, status=status.HTTP_404_NOT_FOUND)
-        return add_cors_headers(response)
+        return Response({"error": "LeetCodeQuestion not found"}, status=status.HTTP_404_NOT_FOUND)
 
     serializer = QuestionNotesSerializer(data=request.data)
     if serializer.is_valid():
         serializer.save(leetcodequestion=leetcode_question, user=request.user)
-        response = Response(serializer.data, status=status.HTTP_201_CREATED)
-        return add_cors_headers(response)
-    response = Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    return add_cors_headers(response)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET', 'OPTIONS'])
 @permission_classes([IsAuthenticated])
@@ -145,11 +146,9 @@ def get_note(request, question_id):
     try:
         notes = QuestionNotes.objects.filter(leetcodequestion__id=question_id, user=request.user)
         serializer = QuestionNotesSerializer(notes, many=True)
-        response = Response(serializer.data)
-        return add_cors_headers(response)
-    except QuestionNotes.DoesNotExist:
-        response = Response({"error": "No notes found for this question"}, status=status.HTTP_404_NOT_FOUND)
-        return add_cors_headers(response)
+        return Response(serializer.data)
+    except Exception as e:
+        return Response({"error": f"Error retrieving notes: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['PUT', 'OPTIONS'])
 @permission_classes([IsAuthenticated])
@@ -161,16 +160,13 @@ def update_note(request, question_id, note_id):
     try:
         note = QuestionNotes.objects.get(id=note_id, user=request.user)
     except QuestionNotes.DoesNotExist:
-        response = Response({"error": "Note not found"}, status=status.HTTP_404_NOT_FOUND)
-        return add_cors_headers(response)
+        return Response({"error": "Note not found"}, status=status.HTTP_404_NOT_FOUND)
 
     serializer = QuestionNotesSerializer(note, data=request.data)
     if serializer.is_valid():
         serializer.save()
-        response = Response(serializer.data)
-        return add_cors_headers(response)
-    response = Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    return add_cors_headers(response)
+        return Response(serializer.data)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['DELETE', 'OPTIONS'])
 @permission_classes([IsAuthenticated])
@@ -182,11 +178,11 @@ def delete_note(request, question_id, note_id):
     try:
         note = QuestionNotes.objects.get(id=note_id, user=request.user)
         note.delete()
-        response = Response({"message": "Note deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
-        return add_cors_headers(response)
+        return Response({"message": "Note deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
     except QuestionNotes.DoesNotExist:
-        response = Response({"error": "Note not found"}, status=status.HTTP_404_NOT_FOUND)
-        return add_cors_headers(response)
+        return Response({"error": "Note not found"}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({"error": f"Error while deleting note: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['GET', 'OPTIONS'])
 @permission_classes([IsAuthenticated])
@@ -199,16 +195,11 @@ def get_codesolution(request, question_id):
         leetcode_question = LeetCodeQuestion.objects.get(id=question_id)
         code_solutions = CodeSolution.objects.filter(user=request.user, leetcodequestion=leetcode_question)
         serializer = CodeSolutionSerializer(code_solutions, many=True)
-        response = Response(serializer.data, status=status.HTTP_200_OK)
-        return add_cors_headers(response)
-    
+        return Response(serializer.data, status=status.HTTP_200_OK)
     except LeetCodeQuestion.DoesNotExist:
-        response = Response({'error': 'LeetCode question not found.'}, status=status.HTTP_404_NOT_FOUND)
-        return add_cors_headers(response)
-
+        return Response({'error': 'LeetCode question not found.'}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
-        response = Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        return add_cors_headers(response)
+        return Response({'error': f"Error retrieving code solutions: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['POST', 'OPTIONS'])
 @permission_classes([IsAuthenticated])
@@ -229,16 +220,12 @@ def create_codesolution(request, question_id):
         )
         
         serializer = CodeSolutionSerializer(code_solution)
-        response = Response(serializer.data, status=status.HTTP_201_CREATED)
-        return add_cors_headers(response)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
     
     except LeetCodeQuestion.DoesNotExist:
-        response = Response({'error': 'LeetCode question not found.'}, status=status.HTTP_404_NOT_FOUND)
-        return add_cors_headers(response)
-
+        return Response({'error': 'LeetCode question not found.'}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
-        response = Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        return add_cors_headers(response)
+        return Response({'error': f"Error while creating code solution: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['DELETE', 'OPTIONS'])
 @permission_classes([IsAuthenticated])
@@ -250,11 +237,11 @@ def delete_codesolution(request, code_id):
     try:
         code_solution = CodeSolution.objects.get(id=code_id, user=request.user)
         code_solution.delete()
-        response = Response({"message": "Solution deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
-        return add_cors_headers(response)
+        return Response({"message": "Solution deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
     except CodeSolution.DoesNotExist:
-        response = Response({"error": "Code solution not found"}, status=status.HTTP_404_NOT_FOUND)
-        return add_cors_headers(response)
+        return Response({"error": "Code solution not found"}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({"error": f"Error while deleting code solution: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['GET', 'OPTIONS'])
 @permission_classes([IsAuthenticated])
@@ -264,23 +251,18 @@ def send_and_getsearchinfo(request, search_string):
         return options_response
 
     if not search_string:
-        response = JsonResponse({"error": "No search string provided"}, status=400)
-        return add_cors_headers(response)
+        return JsonResponse({"error": "No search string provided"}, status=400)
 
     try:
         data = get_leetscrape_data(search_string)
 
         if "error" in data:
-            response = JsonResponse(data, status=404)
-            return add_cors_headers(response)
+            return JsonResponse(data, status=404)
 
-        response = JsonResponse(data, status=200)
-        return add_cors_headers(response)
+        return JsonResponse(data, status=200)
     
     except Exception as e:
-        print(f"Error occurred: {str(e)}")
-        response = JsonResponse({"error": "Internal Server Error"}, status=500)
-        return add_cors_headers(response)
+        return JsonResponse({"error": f"Internal Server Error: {str(e)}"}, status=500)
 
 @api_view(['POST', 'OPTIONS'])
 @permission_classes([IsAuthenticated])
@@ -296,14 +278,12 @@ def get_gptfeedback(request):
         user_code = data.get('user_code') 
 
         feedback, rating = get_feedback(leetcode_question, user_code, leetcode_question_topics)
-        response = Response({
+        return Response({
             "feedback": feedback,
             "rating": rating
         }, status=200)
-        return add_cors_headers(response)
     except Exception as e: 
-        response = Response({"error": f"An error occurred: {str(e)}"}, status=500)
-        return add_cors_headers(response)
+        return Response({"error": f"An error occurred: {str(e)}"}, status=500)
 
 @api_view(['POST', 'OPTIONS'])
 @permission_classes([IsAuthenticated])
@@ -315,14 +295,12 @@ def get_starter_code(request):
     try:
         code_body = request.data
         javascript_startercode, typescript_startercode, python_startercode, java_startercode, csharp_startercode = get_start_code(code_body)
-        response = Response({
+        return Response({
             "javascript_starter_code": javascript_startercode,
             "typescript_starter_code": typescript_startercode,
             "python_starter_code": python_startercode,
             "java_starter_code": java_startercode,
             "csharp_starter_code": csharp_startercode,
         }, status=200)
-        return add_cors_headers(response)
     except Exception as e:
-        response = Response({"error": f"An error occurred: {str(e)}"}, status=500)
-        return add_cors_headers(response)
+        return Response({"error": f"An error occurred: {str(e)}"}, status=500)
